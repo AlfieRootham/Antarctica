@@ -1,11 +1,15 @@
 import customtkinter as ctk
 from tkinter import filedialog
+import requests
+from bs4 import BeautifulSoup
 
 #print(ctk.__version__)
 
 def execute_search():
     return
 
+
+#file search to add this to an existing excel file
 def browse_file_location():
     file_path = filedialog.asksaveasfilename(
         defaultextension=".xlsx",
@@ -30,7 +34,7 @@ app.configure(fg_color="black")
 title_label = ctk.CTkLabel(
     app,
     text="GitHub User Search Engine",
-    font=("Arial", 32, "bold"),
+    font=("Calibri", 32, "bold"),
     text_color="white"
 )
 title_label.pack(pady=(60, 0))
@@ -92,3 +96,38 @@ search_button = ctk.CTkButton(
 search_button.grid(row=2, column=0)
 
 app.mainloop()
+
+def scrape_github(username):
+    '''
+    scrapes a users github repositories pagea to get a dictionary that contains repository names (made dictiobnary as readme links no. of stars and other attributes could be added)
+    returns a list of dictionarys where each dictioary contains repository atitributes 
+    
+    '''
+
+    url = f"https://github.com/{username}?tab=repositories"
+
+    response = requests.get(url)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    repositories = []
+
+    repo_links = soup.select('a[itemprop="name codeRepository"]')
+
+    for repo_link in repo_links:
+        repo_name = repo_link.text.strip()
+        relative_url = repo_link.get("href")
+
+        repo_url = f"https://github.com{relative_url}"
+        readme_url = f"{repo_url}#readme"
+
+        repositories.append({
+            "Repository Name": repo_name,
+            "Repository URL": repo_url,
+            "README URL": readme_url
+        })
+
+    return repositories
+
+print(scrape_github("AlfieRootham"))
