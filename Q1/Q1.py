@@ -9,6 +9,9 @@ import webbrowser
 
 #print(ctk.__version__)
 
+'''
+Button functions 
+'''
 def execute_search():
     global last_created_file
 
@@ -21,6 +24,7 @@ def execute_search():
     user_repositories = scrape_github(user)
     get_excel(user_repositories, file_path)
 
+    #create link under the search button 
     last_created_file = file_path
 
     file_link_label.configure(
@@ -42,7 +46,17 @@ def browse_file_location():
         file_location_entry.delete(0, "end")
         file_location_entry.insert(0, file_path)
 
+#create in page link to file
+last_created_file = None
 
+def open_created_file(event=None):
+    if last_created_file and os.path.exists(last_created_file):
+        webbrowser.open(last_created_file)
+
+
+'''
+Create GUI
+'''
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
@@ -63,13 +77,6 @@ title_label.pack(pady=(60, 0))
 # Main centered container
 search_frame = ctk.CTkFrame(app, fg_color="black")
 search_frame.place(relx=0.5, rely=0.5, anchor="center")
-
-#create in page link to file
-last_created_file = None
-
-def open_created_file(event=None):
-    if last_created_file and os.path.exists(last_created_file):
-        webbrowser.open(last_created_file)
 
 # Search bar
 search_entry = ctk.CTkEntry(
