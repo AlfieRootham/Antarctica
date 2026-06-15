@@ -5,9 +5,35 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import os
 import webbrowser
+from google import genai
+from dotenv import load_dotenv, dotenv_values
+from pathlib import Path
 
 
 #print(ctk.__version__)
+#load the path to the . env fils so that the api key can be found
+env_path = Path(__file__).resolve().parent.parent / ".env"
+
+#print("Current working directory:", Path.cwd())
+#print("Env path:", env_path)
+#print("Env exists:", env_path.exists())
+#print("raw values:", dotenv_values(env_path))
+
+
+
+load_dotenv(env_path)
+api = os.getenv("GEMINI_API_KEY")
+#print(api)
+
+client = genai.Client(api_key=api)
+
+response = client.models.generate_content(
+    model="gemini-3.5-flash",
+    contents="Explain how AI works in a few words",
+)
+
+print(response.text)
+
 
 '''
 Button functions 
@@ -140,6 +166,11 @@ file_link_label = ctk.CTkLabel(
 file_link_label.grid(row=3, column=0, columnspan=2, pady=(15, 0))
 
 file_link_label.bind("<Button-1>", open_created_file)
+
+'''
+code functions
+'''
+
 
 def scrape_github(username):
     '''
