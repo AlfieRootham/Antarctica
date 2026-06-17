@@ -8,6 +8,7 @@ import webbrowser
 from google import genai
 from dotenv import load_dotenv, dotenv_values
 from pathlib import Path
+from chatbot import gemini
 
 
 #print(ctk.__version__)
@@ -24,7 +25,7 @@ env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(env_path)
 api = os.getenv("GEMINI_API_KEY")
 #print(api)
-
+'''
 client = genai.Client(api_key=api)
 
 response = client.models.generate_content(
@@ -33,7 +34,7 @@ response = client.models.generate_content(
 )
 
 print(response.text)
-
+'''
 
 '''
 Button functions 
@@ -79,7 +80,18 @@ def open_created_file(event=None):
     if last_created_file and os.path.exists(last_created_file):
         webbrowser.open(last_created_file)
 
+def send_message():
+    user_message = chat_input.get()
 
+    if not user_message.strip():
+        return
+
+    chat_display.insert("end", f"You: {user_message}\n")
+    chat_input.delete(0, "end")
+
+    bot_reply = gemini(user_message)
+
+    chat_display.insert("end", f"Gemini: {bot_reply}\n\n")
 '''
 Create GUI
 '''
@@ -91,9 +103,21 @@ app.title("GitHub Repository Exporter")
 app.geometry("800x500")
 app.configure(fg_color="black")
 
+#two frames so that the chatbot an dsearch both appear on the screen
+main_container = ctk.CTkFrame(app)
+main_container.pack(fill="both", expand=True, padx=20, pady=20)
+
+left_frame = ctk.CTkFrame(main_container)
+left_frame.pack(side="left", fill="both", expand=True, padx=(0, 17.5))
+
+chat_frame = ctk.CTkFrame(main_container, width=300)
+chat_frame.pack(side="right", fill="y", padx=(10, 0))
+chat_frame.pack_propagate(False)
+
+
 # Title
 title_label = ctk.CTkLabel(
-    app,
+    left_frame,
     text="GitHub User Search Engine",
     font=("Calibri", 32, "bold"),
     text_color="white"
@@ -101,13 +125,13 @@ title_label = ctk.CTkLabel(
 title_label.pack(pady=(60, 0))
 
 # Main centered container
-search_frame = ctk.CTkFrame(app, fg_color="black")
+search_frame = ctk.CTkFrame(left_frame, fg_color="#383838")
 search_frame.place(relx=0.5, rely=0.5, anchor="center")
 
 # Search bar
 search_entry = ctk.CTkEntry(
     search_frame,
-    width=420,
+    width=350,
     height=45,
     corner_radius=22,
     fg_color="white",
@@ -119,7 +143,7 @@ search_entry.grid(row=0, column=0, padx=(0, 10))
 
 file_location_entry = ctk.CTkEntry(
     search_frame,
-    width=420,
+    width=350,
     height=45,
     corner_radius=22,
     fg_color="white",
@@ -167,6 +191,15 @@ file_link_label.grid(row=3, column=0, columnspan=2, pady=(15, 0))
 
 file_link_label.bind("<Button-1>", open_created_file)
 
+#chat bot
+chat_display = ctk.CTkTextbox(chat_frame, width=500, height=300)
+chat_display.pack(pady=10)
+
+chat_input = ctk.CTkEntry(chat_frame, width=400, placeholder_text="Ask the chatbot...")
+chat_input.pack(pady=5)
+
+send_button = ctk.CTkButton(chat_frame, text="Send", command=send_message)
+send_button.pack(pady=5)
 '''
 code functions
 '''
